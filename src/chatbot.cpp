@@ -46,62 +46,51 @@ ChatBot::~ChatBot()
 ////
 ChatBot::ChatBot(const ChatBot &source) // 2 : copy constructor
 {
-    _image = new wxBitmap();
-    *_image = *source._image;
-    // _chatLogic = new ChatLogic();
-    // *_chatLogic = *source._chatLogic;
-    // _rootNode = new GraphNode(1);
-    // *_rootNode = *source._rootNode;
-    std::cout << "ChatBot Copy Constructor instance" << &source << " to instance " << this << std::endl;
+    _image = new wxBitmap(*source._image);
+    _chatLogic = source._chatLogic;
+    _rootNode = source._rootNode;
+    std::cout << "ChatBot Copy Constructor instance " << &source << " to instance " << this << std::endl;
 }
 
 
 ChatBot& ChatBot::operator=(const ChatBot &source) // 3 : copy assignment operator
 {
-    std::cout << "ChatBot copy assignment operator instance" << &source << " to instance " << this << std::endl;
+    std::cout << "ChatBot copy assignment operator instance " << &source << " to instance " << this << std::endl;
     if (this == &source)
        return *this;
     delete _image;
-    _image = new wxBitmap();
-    *_image = *source._image;
-    // delete _chatLogic;
-    // _chatLogic = new ChatLogic();
-    // *_chatLogic = *source._chatLogic;
-    // delete _rootNode;
-    // _rootNode = new GraphNode(1);
-    // *_rootNode = *source._rootNode;
+    _image = new wxBitmap(*source._image);
+    _chatLogic = source._chatLogic;;
+    _rootNode = source._rootNode;
     return *this;
 }
 
 ChatBot::ChatBot(ChatBot &&source) // 4 : move constructor
 {
     std::cout << "ChatBot move constructor instance " << &source << " to instance " << this << std::endl;
+    _chatLogic = source._chatLogic;
+    _rootNode = source._rootNode;
     _image = source._image;
-    // _chatLogic = source._chatLogic;
-    // _rootNode = source._rootNode;
-    source._image = nullptr;
-    // source._chatLogic = nullptr;
-    // source._rootNode = nullptr;
+    
+    source._chatLogic = nullptr;
+    source._rootNode = nullptr;
+    source._image = NULL;
 }
 
-ChatBot& ChatBot::operator=(ChatBot &&source) // 5 : move assignment operator
+ChatBot& ChatBot::operator=(ChatBot &&source)// 5 : move assignment operator
 {
-    std::cout << "ChatBot move assignment operatorinstance " << &source << " to instance " << this << std::endl;
+    std::cout << "ChatBot move assignment operator instance " << &source << " to instance " << this << std::endl;
     if (this == &source)
         return *this;
 
     delete _image;
     _image = source._image;
-
-    // delete _chatLogic;
-    // _chatLogic = source._chatLogic;
-
-    // delete _rootNode;
-    // _rootNode = source._rootNode;
+    _chatLogic = source._chatLogic;
+    _rootNode = source._rootNode; 
 
     source._image = nullptr;
-    // source._chatLogic = nullptr;
-    // source._rootNode = nullptr;
+    source._chatLogic = nullptr;
+    source._rootNode = nullptr;
 
     return *this;
 }
@@ -146,13 +135,12 @@ void ChatBot::SetCurrentNode(GraphNode *node)
 {
     // update pointer to current node
     _currentNode = node;
-
     // select a random node answer (if several answers should exist)
     std::vector<std::string> answers = _currentNode->GetAnswers();
     std::mt19937 generator(int(std::time(0)));
     std::uniform_int_distribution<int> dis(0, answers.size() - 1);
     std::string answer = answers.at(dis(generator));
-
+    _chatLogic->SetChatbotHandle(this); // update chatBot for chatLogic 
     // send selected node answer to user
     _chatLogic->SendMessageToUser(answer);
 }
